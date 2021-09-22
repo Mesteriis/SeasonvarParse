@@ -22,7 +22,7 @@ def GetEpisodeByTitle_SeazonId(title, seazonId):
     return CONNECTION.execute(result).fetchall()
 
 
-def InsertEpisode(title, voiceId, number, seazonId, link):
-    ins = episodes.insert().values(title = title, voiceId = voiceId, number = number, seazonId = seazonId, link = link) 
+def InsertEpisode(title, voiceId, number, seazonId, link, subtitles = ''):
+    ins = episodes.insert().values(title = title, voiceId = voiceId, number = number, seazonId = seazonId, link = link, subtitles = subtitles) 
     result = CONNECTION.execute(ins)
     return result.lastrowid

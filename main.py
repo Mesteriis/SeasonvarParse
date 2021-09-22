@@ -24,14 +24,14 @@ def index():
     soup = BeautifulSoup(response.text, 'lxml')
 
     
-    list_voices = soup.find_all('select', {'data-filter':"golosa"})[0].text # получаем список озвучек
-    list_voices = list_voices.split('\n')
-    list_voices.pop(1)
-    list_voices.pop()
+    # list_voices = soup.find_all('select', {'data-filter':"golosa"})[0].text # получаем список озвучек
+    # list_voices = list_voices.split('\n')
+    # list_voices.pop(1)
+    # list_voices.pop()
 
-    for voice in list_voices: # запись озвучек в базу
-        if(not GetVoicesByVoice(voice)):
-            InsertVoice(voice)
+    # for voice in list_voices: # запись озвучек в базу
+    #     if(not GetVoicesByVoice(voice)):
+    #         InsertVoice(voice)
 
     urls = soup.find_all('div', class_='lside-serial')[0] # получаю список всех сериалов
     Parse(urls)
@@ -44,8 +44,8 @@ def Parse(urls): # главный парсер
 
         link = 'http://seasonvar.ru' + url.get('href') # ссылка на последний сезон сериала
 
-
         serial_name = url.text
+        print(serial_name)
         serial = GetSerialsByTitle(serial_name)
         if(serial):
             serialId = serial[0].id
@@ -132,7 +132,7 @@ def ParseSeries(voiceId, media_voices, seasonId):
         if(episode):
             continue
         else:
-            InsertEpisode(series_title, voiceId, series_number, seasonId, series_url)
+            InsertEpisode(series_title, voiceId, series_number, seasonId, series_url, series_subtitle)
 
 
 if __name__ == '__main__':

@@ -33,7 +33,8 @@ episodes = Table(
     Column('seazonId', Integer, ForeignKey('seazons.id')),
     Column('voiceId', Integer, ForeignKey('voices.id')),
     Column('number', Integer, nullable=False),
-    Column('link', String(255), nullable=False)
+    Column('link', String(255), nullable=False),
+    Column('subtitles', String(255))
 )
 
 meta.create_all(engine)
