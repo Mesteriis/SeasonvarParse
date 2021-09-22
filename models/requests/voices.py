@@ -18,4 +18,5 @@ def GetVoicesByVoice(voice):
 
 def InsertVoice(voice):
     ins = voices.insert().values(voice = voice) 
-    CONNECTION.execute(ins)
+    result = CONNECTION.execute(ins)
+    return result.lastrowid

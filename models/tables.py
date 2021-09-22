@@ -13,7 +13,7 @@ voices = Table(
 serials = Table(
     'serials', meta,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('title', String(255), nullable=False)
+    Column('title', String(255), nullable=False, unique=True)
 )
 
 seazons = Table(
