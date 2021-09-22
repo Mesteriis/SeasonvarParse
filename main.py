@@ -23,12 +23,12 @@ def index():
     response = requests.get(index_url, headers=headers)
     soup = BeautifulSoup(response.text, 'lxml')
 
-
+    
     list_voices = soup.find_all('select', {'data-filter':"golosa"})[0].text # получаем список озвучек
     list_voices = list_voices.split('\n')
-    list_voices.pop(0)
-    list_voices.pop(0)
-    list_voices.pop(-1)
+    del list_voices[0:2]
+    list_voices.pop()
+
     for voice in list_voices: # запись озвучек в базу
         if(not GetVoicesByVoice(voice)):
             InsertVoice(voice)
