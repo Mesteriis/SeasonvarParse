@@ -1,5 +1,4 @@
 from datetime import time
-from flask import Flask
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -12,9 +11,12 @@ from models.requests.voices import GetVoicesByVoice, InsertVoice, GetAllVoices
 from models.requests.seazons import GetSeazonByTitle_SerialId, InsertSeazon
 from models.requests.episodes import InsertEpisode, GetEpisodeByLink
 
-app = Flask(__name__)
+start_time = time.time()
+file_log = open('logs.txt', 'a')
 
-@app.route('/', methods=['GET'])
+count_serials_parse = int(input("Введите колличество сериалов которые спарсятся (0-если все): "))
+
+
 def index():
 
     index_url = 'http://seasonvar.ru'
@@ -34,18 +36,21 @@ def index():
     # получаю список всех сериалов
     urls = soup.find_all('div', class_='lside-serial')[0]
     Parse(urls)
-
+    file_log.write('\n\n..................NEW LOGGING..................\n\n\n')
+    file_log.close()
     return json.dumps({'data': 12})
 
 
+
 def Parse(urls):  # главный парсер
-    for url in urls.findAll('a'):
+    for serial_count, url in enumerate(urls.findAll('a')):
+
+        serial_count+=1
 
         # ссылка на последний сезон сериала
         link = 'http://seasonvar.ru' + url.get('href')
-        link = 'http://seasonvar.ru/serial-18750-12_obez_yan_psbmifg-00004-sezon.html'
         serial_name = url.text
-        print(serial_name)
+
         serial = GetSerialsByTitle(serial_name)
         if(serial):
             serialId = serial[0].id
@@ -63,8 +68,15 @@ def Parse(urls):  # главный парсер
         SECURE_MARK = SECURE_MARK[SECURE_MARK.find(
             ":")+3: SECURE_MARK.find("\',")]  # получаем хэш для страниц
 
+
+        print(f'#{serial_count}-----{serial_name}-----{round(time.time() - start_time)} sec')
+        file_log.write(f'#{serial_count}-----{serial_name}-----')
+
         SeasonParse(serialId, list_seasons, SECURE_MARK)
-        break
+
+
+        if ((count_serials_parse > 0) & (count_serials_parse == serial_count)):
+            break
 
 
 def PwSingle(link):
@@ -81,7 +93,7 @@ def PwSingle(link):
 def SeasonParse(serialId, list_seasons, SECURE_MARK):
     for season_number, season in enumerate(list_seasons):
         season_number += 1
-
+        
         # ссылка на каждый сезон сериала(с первого до последнего)
         season_link = 'http://seasonvar.ru' + season.get("href")
 
@@ -105,8 +117,11 @@ def SeasonParse(serialId, list_seasons, SECURE_MARK):
             'div.pgs-sinfo').get('data-id-season')
         time.sleep(1)
 
+        
         ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id)
         time.sleep(1)
+
+        file_log.write(f'Колличество сезонов={len(list_seasons)}-----Время парсинга={round(time.time() - start_time)} sec\n')
 
 
 def ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id):
@@ -154,4 +169,4 @@ def SetEpisodes(media, series_number, seasonId, voiceId):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    index()
