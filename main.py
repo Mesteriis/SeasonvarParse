@@ -43,7 +43,6 @@ def Parse(urls): # главный парсер
     for url in urls.findAll('a'):
 
         link = 'http://seasonvar.ru' + url.get('href') # ссылка на последний сезон сериала
-
         serial_name = url.text
         print(serial_name)
         serial = GetSerialsByTitle(serial_name)
@@ -64,7 +63,6 @@ def Parse(urls): # главный парсер
         SECURE_MARK = SECURE_MARK[SECURE_MARK.find(":")+3 : SECURE_MARK.find("\',")] # получаем хэш для страниц
 
         SeasonParse(serialId, list_seasons, SECURE_MARK)
-        
 
 
 def PwSingle(link):
@@ -121,18 +119,27 @@ def ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id):
 def ParseSeries(voiceId, media_voices, seasonId):
     for series_number, media in enumerate(media_voices):
         series_number +=1
-        series_url = media['file'] # хэшированый url медиа файлов || начинается на #2...//b2xvbG8=...
-        series_url = series_url[2:series_url.find("//")] + series_url[series_url.find("=")+1:] # хэшированый url медиа файлов
-        series_url = base64.b64decode(series_url).decode("UTF-8") # url серии
-        
-        series_title = media['title'] # название серии
-        series_subtitle = media['subtitle'] # ссылка на субтитры к серии || начинается на [ru]http://...,[eng]http://...
-
-        episode = GetEpisodeByLink(series_url)
-        if(episode):
-            continue
+        if('folder' in media):
+            for series_folder, media_folder in enumerate(media['folder']):
+                series_folder = (series_folder+1) * series_number
+                SetEpisodes(media_folder, series_number, seasonId, voiceId)
         else:
-            InsertEpisode(series_title, voiceId, series_number, seasonId, series_url, series_subtitle)
+            SetEpisodes(media, series_number, seasonId, voiceId)
+
+
+def SetEpisodes(media, series_number, seasonId, voiceId):
+    series_url = media['file'] # хэшированый url медиа файлов || начинается на #2...//b2xvbG8=...
+    series_url = series_url[2:series_url.find("//")] + series_url[series_url.find("=")+1:] # хэшированый url медиа файлов
+    series_url = base64.b64decode(series_url).decode("UTF-8") # url серии
+    
+    series_title = media['title'] # название серии
+    series_subtitle = media['subtitle'] # ссылка на субтитры к серии || начинается на [ru]http://...,[eng]http://...
+
+    episode = GetEpisodeByLink(series_url)
+    if(episode):
+        return
+    else:
+        InsertEpisode(series_title, voiceId, series_number, seasonId, series_url, series_subtitle)
 
 
 if __name__ == '__main__':
