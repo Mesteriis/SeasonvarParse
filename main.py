@@ -14,7 +14,6 @@ from models.requests.episodes import InsertEpisode, GetEpisodeByLink
 
 app = Flask(__name__)
 
-
 @app.route('/', methods=['GET'])
 def index():
 
@@ -23,7 +22,6 @@ def index():
     response = requests.get(index_url, headers=headers)
     soup = BeautifulSoup(response.text, 'lxml')
 
-    
     # list_voices = soup.find_all('select', {'data-filter':"golosa"})[0].text # получаем список озвучек
     # list_voices = list_voices.split('\n')
     # list_voices.pop(1)
@@ -33,16 +31,19 @@ def index():
     #     if(not GetVoicesByVoice(voice)):
     #         InsertVoice(voice)
 
-    urls = soup.find_all('div', class_='lside-serial')[0] # получаю список всех сериалов
+    # получаю список всех сериалов
+    urls = soup.find_all('div', class_='lside-serial')[0]
     Parse(urls)
 
     return json.dumps({'data': 12})
 
 
-def Parse(urls): # главный парсер
+def Parse(urls):  # главный парсер
     for url in urls.findAll('a'):
 
-        link = 'http://seasonvar.ru' + url.get('href') # ссылка на последний сезон сериала
+        # ссылка на последний сезон сериала
+        link = 'http://seasonvar.ru' + url.get('href')
+        link = 'http://seasonvar.ru/serial-18750-12_obez_yan_psbmifg-00004-sezon.html'
         serial_name = url.text
         print(serial_name)
         serial = GetSerialsByTitle(serial_name)
@@ -51,50 +52,57 @@ def Parse(urls): # главный парсер
         else:
             serialId = InsertSerial(serial_name)
 
-
-        single_page = PwSingle(link) # парсинг динамического контента на странице сезона
+        # парсинг динамического контента на странице сезона
+        single_page = PwSingle(link)
 
         list_seasons = single_page.select_one('ul.tabs-result')
-        list_seasons = list_seasons.findAll('a') # список сезонов сериала
-
+        list_seasons = list_seasons.findAll('a')  # список сезонов сериала
 
         SECURE_MARK = single_page.select_one('div.pgs-player')
         SECURE_MARK = SECURE_MARK.findAll('script')[1].text
-        SECURE_MARK = SECURE_MARK[SECURE_MARK.find(":")+3 : SECURE_MARK.find("\',")] # получаем хэш для страниц
+        SECURE_MARK = SECURE_MARK[SECURE_MARK.find(
+            ":")+3: SECURE_MARK.find("\',")]  # получаем хэш для страниц
 
         SeasonParse(serialId, list_seasons, SECURE_MARK)
+        break
 
 
 def PwSingle(link):
     with sync_playwright() as p:
         browser = p.firefox.launch()
         page = browser.new_page()
-        page.goto(link, timeout = 0)
-        single_page = BeautifulSoup(page.content(), 'lxml') # html код страницы сезона
+        page.goto(link, timeout=0)
+        # html код страницы сезона
+        single_page = BeautifulSoup(page.content(), 'lxml')
         browser.close()
         return single_page
 
 
-
 def SeasonParse(serialId, list_seasons, SECURE_MARK):
     for season_number, season in enumerate(list_seasons):
-        season_number +=1
+        season_number += 1
 
-        season_link = 'http://seasonvar.ru' + season.get("href") # ссылка на каждый сезон сериала(с первого до последнего)
+        # ссылка на каждый сезон сериала(с первого до последнего)
+        season_link = 'http://seasonvar.ru' + season.get("href")
 
         res = requests.get(season_link, headers=headers)
-        this_single_page = BeautifulSoup(res.text, 'lxml') # не динамический html текст страницы сезона
+        # не динамический html текст страницы сезона
+        this_single_page = BeautifulSoup(res.text, 'lxml')
 
-        season_description = this_single_page.select_one('p', {'itemprop':"description"}).text
-        season_title = this_single_page.select_one('h1', {'itemprop':"name"}).text
+        season_description = this_single_page.select_one(
+            'p', {'itemprop': "description"}).text
+        season_title = this_single_page.select_one(
+            'h1', {'itemprop': "name"}).text
 
         season = GetSeazonByTitle_SerialId(season_title, serialId)
         if(season):
-            seasonId=season[0].id
+            seasonId = season[0].id
         else:
-            seasonId=InsertSeazon(season_title, season_description, season_number, serialId, season_link)
+            seasonId = InsertSeazon(
+                season_title, season_description, season_number, serialId, season_link)
 
-        seasonvar_season_id = this_single_page.select_one('div.pgs-sinfo').get('data-id-season')
+        seasonvar_season_id = this_single_page.select_one(
+            'div.pgs-sinfo').get('data-id-season')
         time.sleep(1)
 
         ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id)
@@ -104,8 +112,8 @@ def SeasonParse(serialId, list_seasons, SECURE_MARK):
 def ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id):
     voices = GetAllVoices()
     for voice in voices:
-        voice_link = 'http://seasonvar.ru/playls2/{}/trans{}/{}/plist.txt'.format(SECURE_MARK, voice[1], seasonvar_season_id)
-
+        voice_link = 'http://seasonvar.ru/playls2/{}/trans{}/{}/plist.txt'.format(
+            SECURE_MARK, voice[1], seasonvar_season_id)
         response1 = requests.get(voice_link, headers=headers)
         media_voices = BeautifulSoup(response1.text, 'lxml').text
         media_voices = json.loads(media_voices)
@@ -115,31 +123,34 @@ def ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id):
             ParseSeries(voice[0], media_voices, seasonId)
 
 
-
 def ParseSeries(voiceId, media_voices, seasonId):
     for series_number, media in enumerate(media_voices):
-        series_number +=1
         if('folder' in media):
             for series_folder, media_folder in enumerate(media['folder']):
                 series_folder = (series_folder+1) * series_number
-                SetEpisodes(media_folder, series_number, seasonId, voiceId)
+                SetEpisodes(media_folder, series_folder, seasonId, voiceId)
         else:
+            series_number += 1
             SetEpisodes(media, series_number, seasonId, voiceId)
 
 
 def SetEpisodes(media, series_number, seasonId, voiceId):
-    series_url = media['file'] # хэшированый url медиа файлов || начинается на #2...//b2xvbG8=...
-    series_url = series_url[2:series_url.find("//")] + series_url[series_url.find("=")+1:] # хэшированый url медиа файлов
-    series_url = base64.b64decode(series_url).decode("UTF-8") # url серии
-    
-    series_title = media['title'] # название серии
-    series_subtitle = media['subtitle'] # ссылка на субтитры к серии || начинается на [ru]http://...,[eng]http://...
+    # хэшированый url медиа файлов || начинается на #2...//b2xvbG8=...
+    series_url = media['file']
+    series_url = series_url.replace('//b2xvbG8=', '')
+    series_url = series_url[2:] # хэшированый url медиа файлов
+    series_url = base64.b64decode(series_url).decode("UTF-8")  # url серии
+
+    series_title = media['title']  # название серии
+    # ссылка на субтитры к серии || начинается на [ru]http://...,[eng]http://...
+    series_subtitle = media['subtitle']
 
     episode = GetEpisodeByLink(series_url)
     if(episode):
         return
     else:
-        InsertEpisode(series_title, voiceId, series_number, seasonId, series_url, series_subtitle)
+        InsertEpisode(series_title, voiceId, series_number,
+                      seasonId, series_url, series_subtitle)
 
 
 if __name__ == '__main__':
