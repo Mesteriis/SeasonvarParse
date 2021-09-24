@@ -105,13 +105,14 @@ def SeasonParse(serialId, list_seasons, SECURE_MARK):
             'p', {'itemprop': "description"}).text
         season_title = this_single_page.select_one(
             'h1', {'itemprop': "name"}).text
-
+        season_img = this_single_page.select_one(
+            'img', {'itemprop': "thumbnailUrl"}).get("src")
         season = GetSeazonByTitle_SerialId(season_title, serialId)
         if(season):
             seasonId = season[0].id
         else:
             seasonId = InsertSeazon(
-                season_title, season_description, season_number, serialId, season_link)
+                season_title, season_description, season_number, serialId, season_link, season_img)
 
         seasonvar_season_id = this_single_page.select_one(
             'div.pgs-sinfo').get('data-id-season')

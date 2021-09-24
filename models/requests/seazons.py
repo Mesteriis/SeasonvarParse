@@ -17,7 +17,7 @@ def GetSeazonByTitle_SerialId(title, serialId):
     return CONNECTION.execute(result).fetchall()
 
 
-def InsertSeazon(title, description, number, serialId, link):
-    ins = seazons.insert().values(title = title, description = description, number = number, serialId = serialId, link = link) 
+def InsertSeazon(title, description, number, serialId, link, image):
+    ins = seazons.insert().values(title = title, description = description, number = number, serialId = serialId, link = link, image = image) 
     result = CONNECTION.execute(ins)
     return result.lastrowid

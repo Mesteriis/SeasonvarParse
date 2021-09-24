@@ -23,7 +23,8 @@ seazons = Table(
     Column('description', TEXT, nullable=False),
     Column('number', Integer),
     Column('serialId', Integer, ForeignKey('serials.id')),
-    Column('link', String(255))
+    Column('link', String(255)),
+    Column('image', String(255), nullable=False)
 )
 
 episodes = Table(
