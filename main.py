@@ -10,9 +10,10 @@ from models.requests.serials import GetSerialsByTitle, InsertSerial
 from models.requests.voices import GetVoicesByVoice, InsertVoice, GetAllVoices
 from models.requests.seazons import GetSeazonByTitle_SerialId, InsertSeazon
 from models.requests.episodes import InsertEpisode, GetEpisodeByLink
+import logging
 
+logging.basicConfig(filename='app.log', filemode="w",format='%(message)s, %(asctime)s', datefmt='%d-%b-%y %H:%M:%S')
 start_time = time.time()
-file_log = open('logs.txt', 'a')
 
 count_serials_parse = int(input("Введите колличество сериалов которые спарсятся (0-если все): "))
 
@@ -36,8 +37,7 @@ def index():
     # получаю список всех сериалов
     urls = soup.find_all('div', class_='lside-serial')[0]
     Parse(urls)
-    file_log.write('\n\n..................NEW LOGGING..................\n\n\n')
-    file_log.close()
+
     return json.dumps({'data': 12})
 
 
@@ -69,11 +69,11 @@ def Parse(urls):  # главный парсер
             ":")+3: SECURE_MARK.find("\',")]  # получаем хэш для страниц
 
 
-        print(f'#{serial_count}-----{serial_name}-----{round(time.time() - start_time)} sec')
-        file_log.write(f'#{serial_count}-----{serial_name}-----')
+        logging.warning(f'#{serial_count} - {serial_name}')
 
         SeasonParse(serialId, list_seasons, SECURE_MARK)
 
+        print(f'#{serial_count}-----{serial_name}-----{round(time.time() - start_time)} sec')
 
         if ((count_serials_parse > 0) & (count_serials_parse == serial_count)):
             break
@@ -121,8 +121,8 @@ def SeasonParse(serialId, list_seasons, SECURE_MARK):
         
         ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id)
         time.sleep(1)
-
-    file_log.write(f'Колличество сезонов={len(list_seasons)}-----Время парсинга={round(time.time() - start_time)} sec\n')
+    logging.warning(f'\tКолличество сезонов={len(list_seasons)}-----Время парсинга={round(time.time() - start_time)} sec')
+    # file_log.write(f'Колличество сезонов={len(list_seasons)}-----Время парсинга={round(time.time() - start_time)} sec\n')
 
 
 def ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id):
