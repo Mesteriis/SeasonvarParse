@@ -122,7 +122,7 @@ def SeasonParse(serialId, list_seasons, SECURE_MARK):
         ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id)
         time.sleep(1)
 
-        file_log.write(f'Колличество сезонов={len(list_seasons)}-----Время парсинга={round(time.time() - start_time)} sec\n')
+    file_log.write(f'Колличество сезонов={len(list_seasons)}-----Время парсинга={round(time.time() - start_time)} sec\n')
 
 
 def ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id):
