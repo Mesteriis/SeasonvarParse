@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, TEXT
 from middleware.config import DB_DIALECT, DB_HOST, DB_NAME, DB_PASSWORD, DB_USER
 
-engine = create_engine(f"{DB_DIALECT}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}")
+engine = create_engine(f"{DB_DIALECT}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}?charset=utf8mb4")
 meta = MetaData()
 
 voices = Table(

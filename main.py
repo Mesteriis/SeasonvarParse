@@ -22,7 +22,7 @@ def index():
 
     index_url = 'http://seasonvar.ru'
 
-    response = requests.get(index_url, headers=headers)
+    response = requests.get(index_url)
     soup = BeautifulSoup(response.text, 'lxml')
 
     # list_voices = soup.find_all('select', {'data-filter':"golosa"})[0].text # получаем список озвучек
@@ -97,7 +97,7 @@ def SeasonParse(serialId, list_seasons, SECURE_MARK):
         # ссылка на каждый сезон сериала(с первого до последнего)
         season_link = 'http://seasonvar.ru' + season.get("href")
 
-        res = requests.get(season_link, headers=headers)
+        res = requests.get(season_link)
         # не динамический html текст страницы сезона
         this_single_page = BeautifulSoup(res.text, 'lxml')
 
@@ -130,7 +130,7 @@ def ParseVoices(seasonId, SECURE_MARK, seasonvar_season_id):
     for voice in voices:
         voice_link = 'http://seasonvar.ru/playls2/{}/trans{}/{}/plist.txt'.format(
             SECURE_MARK, voice[1], seasonvar_season_id)
-        response1 = requests.get(voice_link, headers=headers)
+        response1 = requests.get(voice_link)
         media_voices = BeautifulSoup(response1.text, 'lxml').text
         media_voices = json.loads(media_voices)
         if(not len(media_voices)):
