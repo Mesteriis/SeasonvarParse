@@ -17,7 +17,7 @@ serials = Table(
 )
 
 seazons = Table(
-    'seazons', meta,
+    'seasons', meta,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('title', String(255), nullable=False),
     Column('description', TEXT, nullable=False),
@@ -31,7 +31,7 @@ episodes = Table(
     'episodes', meta,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('title', String(255)),
-    Column('seazonId', Integer, ForeignKey('seazons.id')),
+    Column('seazonId', Integer, ForeignKey('seasons.id')),
     Column('voiceId', Integer, ForeignKey('voices.id')),
     Column('number', Integer, nullable=False),
     Column('link', String(255), nullable=False),
