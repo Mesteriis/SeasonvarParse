@@ -15,7 +15,8 @@ import logging
 logging.basicConfig(filename='app.log', filemode="w",format='%(message)s, %(asctime)s', datefmt='%d-%b-%y %H:%M:%S')
 start_time = time.time()
 
-count_serials_parse = int(input("Введите колличество сериалов которые спарсятся (0-если все): "))
+# count_serials_parse = int(input("Введите колличество сериалов которые спарсятся (0-если все): "))
+start_serials_parse = int(input("Введите с какого сериала начать (1-n): "))
 
 
 def index():
@@ -36,6 +37,7 @@ def index():
 
     # получаю список всех сериалов
     urls = soup.find_all('div', class_='lside-serial')[0]
+
     Parse(urls)
 
     return json.dumps({'data': 12})
@@ -44,9 +46,10 @@ def index():
 
 def Parse(urls):  # главный парсер
     for serial_count, url in enumerate(urls.findAll('a')):
-
+        
         serial_count+=1
-
+        if serial_count < start_serials_parse:
+            continue
         # ссылка на последний сезон сериала
         link = 'http://seasonvar.ru' + url.get('href')
         serial_name = url.text
@@ -75,8 +78,8 @@ def Parse(urls):  # главный парсер
 
         print(f'#{serial_count}-----{serial_name}-----{round(time.time() - start_time)} sec')
 
-        if ((count_serials_parse > 0) & (count_serials_parse == serial_count)):
-            break
+        # if ((count_serials_parse > 0) & (count_serials_parse == serial_count)):
+        #     break
 
 
 def PwSingle(link):
