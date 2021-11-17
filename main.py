@@ -46,40 +46,43 @@ def index():
 
 def Parse(urls):  # главный парсер
     for serial_count, url in enumerate(urls.findAll('a')):
-        
-        serial_count+=1
-        if serial_count < start_serials_parse:
+        try:
+            serial_count+=1
+            if serial_count < start_serials_parse:
+                continue
+            # ссылка на последний сезон сериала
+            link = 'http://seasonvar.ru' + url.get('href')
+            serial_name = url.text
+
+            serial = GetSerialsByTitle(serial_name)
+            if(serial):
+                serialId = serial[0].id
+            else:
+                serialId = InsertSerial(serial_name)
+
+            # парсинг динамического контента на странице сезона
+            single_page = PwSingle(link)
+
+            list_seasons = single_page.select_one('ul.tabs-result')
+            list_seasons = list_seasons.findAll('a')  # список сезонов сериала
+
+            SECURE_MARK = single_page.select_one('div.pgs-player')
+            SECURE_MARK = SECURE_MARK.findAll('script')[1].text
+            SECURE_MARK = SECURE_MARK[SECURE_MARK.find(
+                ":")+3: SECURE_MARK.find("\',")]  # получаем хэш для страниц
+
+
+            logging.warning(f'#{serial_count} - {serial_name}')
+
+            SeasonParse(serialId, list_seasons, SECURE_MARK)
+
+            print(f'#{serial_count}-----{serial_name}-----{round(time.time() - start_time)} sec')
+
+            if ((count_serials_parse > 0) & (count_serials_parse + start_serials_parse - 1 == serial_count)):
+                break
+        except:
             continue
-        # ссылка на последний сезон сериала
-        link = 'http://seasonvar.ru' + url.get('href')
-        serial_name = url.text
-
-        serial = GetSerialsByTitle(serial_name)
-        if(serial):
-            serialId = serial[0].id
-        else:
-            serialId = InsertSerial(serial_name)
-
-        # парсинг динамического контента на странице сезона
-        single_page = PwSingle(link)
-
-        list_seasons = single_page.select_one('ul.tabs-result')
-        list_seasons = list_seasons.findAll('a')  # список сезонов сериала
-
-        SECURE_MARK = single_page.select_one('div.pgs-player')
-        SECURE_MARK = SECURE_MARK.findAll('script')[1].text
-        SECURE_MARK = SECURE_MARK[SECURE_MARK.find(
-            ":")+3: SECURE_MARK.find("\',")]  # получаем хэш для страниц
-
-
-        logging.warning(f'#{serial_count} - {serial_name}')
-
-        SeasonParse(serialId, list_seasons, SECURE_MARK)
-
-        print(f'#{serial_count}-----{serial_name}-----{round(time.time() - start_time)} sec')
-
-        if ((count_serials_parse > 0) & (count_serials_parse + start_serials_parse - 1 == serial_count)):
-            break
+        
 
 
 def PwSingle(link):

@@ -1,6 +1,2 @@
-#513 - АйКарли , 17-Nov-21 10:32:36
-	Колличество сезонов=6-----Время парсинга=73 sec, 17-Nov-21 10:33:23
-#514 - Айкацу! , 17-Nov-21 10:33:33
-	Колличество сезонов=1-----Время парсинга=93 sec, 17-Nov-21 10:33:44
-#515 - Айрис , 17-Nov-21 10:33:55
-	Колличество сезонов=2-----Время парсинга=119 sec, 17-Nov-21 10:34:09
+Task was destroyed but it is pending!
+task: <Task pending name='Task-64' coro=<BrowserType.launch() running at /home/bodya18/PythonProjects/SeasonvarParse/venv/lib/python3.8/site-packages/playwright/_impl/_browser_type.py:88> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7fdf600f8580>()]> cb=[SyncBase._sync.<locals>.callback() at /home/bodya18/PythonProjects/SeasonvarParse/venv/lib/python3.8/site-packages/playwright/_impl/_sync_base.py:104]>, 17-Nov-21 14:16:50
