@@ -55,11 +55,7 @@ def Parse(urls):  # главный парсер
             serial_name = url.text
 
             serial = GetSerialsByTitle(serial_name)
-            if(serial):
-                serialId = serial[0].id
-            else:
-                serialId = InsertSerial(serial_name)
-
+            serialId = serial[0].id if (serial) else InsertSerial(serial_name)
             # парсинг динамического контента на странице сезона
             single_page = PwSingle(link)
 
